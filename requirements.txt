@@ -1,0 +1,9 @@
+langgraph
+langsmith
+langchain_anthropic
+python-dotenv
+tavily-python
+langchain_community
+pydantic
+requests
+typing-extensions
