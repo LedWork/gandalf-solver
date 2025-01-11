@@ -24,6 +24,7 @@ BASE_URL = 'https://gandalf.lakera.ai/api'
 MAX_ATTEMPTS_PER_LEVEL = 3
 HISTORY_FILE = Path("gandalf/history.json")
 STRATEGY_CHANGE_THRESHOLD = 2  # Change strategy after this many failed attempts with same approach
+ATTEMPTS_HISTORY_FILE = Path("gandalf/attempts_history.json")
 
 def reducer_level(state: int, update: int) -> int:
     # print("reducer_level", state, update)
@@ -43,6 +44,9 @@ def reducer_history(state: Dict[str, List[Dict[str, str]]], update: Dict[str, Li
 def reducer_analysis(state: Dict[str, Any], update: Dict[str, Any]) -> Dict[str, Any]:
     return {**state, **update}
 
+def reducer_completion_history(state: Dict[str, List[Dict[str, Any]]], update: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
+    return {**state, **update}
+
 class GandalfState(TypedDict):
     messages: Annotated[list, add_messages]
     current_defender: Annotated[str, reducer_current_defender]
@@ -50,6 +54,7 @@ class GandalfState(TypedDict):
     history: Annotated[Dict[str, List[Dict[str, str]]], reducer_history]
     analysis: Annotated[Dict[str, Any], reducer_analysis]
     next_agent: Annotated[str, reducer_next_agent]
+    completion_history: Annotated[Dict[str, List[Dict[str, Any]]], reducer_completion_history]
 
 class DefenderInfo(BaseModel):
     description: str
@@ -202,6 +207,11 @@ Generate a prompt that implements this strategy.
         "timestamp": datetime.now().isoformat()
     })
     
+    # Save the updated history
+    ATTEMPTS_HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(ATTEMPTS_HISTORY_FILE, 'w') as f:
+        json.dump(state["history"], f, indent=2)
+    
     state["next_agent"] = "analyzer"
     state["messages"].append(AIMessage(content=message_response["answer"]))
     
@@ -317,7 +327,8 @@ Remember: Respond with ONLY the password wrapped in <answer> tags.""")
                 "defender": state["current_defender"],
                 "prompt": latest_attempt["prompt"],
                 "answer": latest_attempt["response"],
-                "password": password
+                "password": password,
+                "next_defender": guess_result.get("next_defender")  # Store next_defender in history
             })
             
             # Save updated history
@@ -373,14 +384,39 @@ def build_gandalf_graph() -> StateGraph:
 def solve_gandalf():
     graph = build_gandalf_graph()
     
+    # Load previous attempts history
+    history = {}
+    if ATTEMPTS_HISTORY_FILE.exists():
+        with open(ATTEMPTS_HISTORY_FILE, 'r') as f:
+            history = json.load(f)
+    
+    # Load successful completions history to determine current level
+    current_defender = "baseline"
+    current_level = 1
+    
+    if HISTORY_FILE.exists():
+        with open(HISTORY_FILE, 'r') as f:
+            completion_history = json.load(f)
+            if completion_history.get("entries"):
+                # Get the last completed level
+                last_entry = completion_history["entries"][-1]
+                current_level = last_entry["level"] + 1  # Move to next level
+                
+                # Get the next defender from the last successful guess
+                if last_entry.get("next_defender"):
+                    current_defender = last_entry["next_defender"]
+    
     initial_state = {
         "messages": [],
-        "current_defender": "baseline",
-        "level": 1,
-        "history": {},
+        "current_defender": current_defender,
+        "level": current_level,
+        "history": history,
         "analysis": {},
-        "next_agent": "strategist"
+        "next_agent": "strategist",
+        "completion_history": {"entries": []}  # Initialize completion_history
     }
+
+    print("initial_state:", json.dumps(initial_state, indent=2))
     
     for event in graph.stream(initial_state, config=config, stream_mode="values"):
         if isinstance(event, dict) and "next_agent" in event:
