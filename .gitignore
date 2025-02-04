@@ -1,3 +1,7 @@
 .env
 history.json
 venv/
+**/__pycache__/**
+attempts_history.json
+history.json
+tmp/
