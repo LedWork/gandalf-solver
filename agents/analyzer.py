@@ -16,7 +16,8 @@ from config.settings import (
     LLM_MODEL,
     LLM_TEMPERATURE,
     ANTHROPIC_API_KEY,
-    MAX_ATTEMPTS_PER_LEVEL
+    MAX_ATTEMPTS_PER_LEVEL,
+    MAX_STRATEGY_CHANGES_PER_LEVEL
 )
 
 llm = ChatAnthropic(
@@ -89,6 +90,9 @@ def response_analyzer(state: GandalfState) -> GandalfState:
     # After successful password guess, save to history
     if guess_result["success"]:
         print(f"Password guess successful! Moving to next level")
+        # Reset both counters on success
+        state["attempts"] = 0
+        state["failed_strategies"] = 0
         save_completion_history(
             level=state["level"],
             defender=state["current_defender"],
@@ -102,18 +106,27 @@ def response_analyzer(state: GandalfState) -> GandalfState:
             state["current_defender"] = guess_result["next_defender"]
             state["level"] += 1
             state["next_agent"] = "strategist"
-            state["attempts"] = 0  # Reset attempts on success
             print("Next defender:", guess_result["next_defender"], "and level", state["level"])
         else:
             print("No next defender, ending level")
             state["next_agent"] = END
     else:
-        state["attempts"] += 1  # Increment attempts on failure
+        state["attempts"] += 1
         print(f"Password guess failed. Attempts: {state['attempts']}/{MAX_ATTEMPTS_PER_LEVEL}")
+        
         if state["attempts"] >= MAX_ATTEMPTS_PER_LEVEL:
-            print("Max attempts reached, ending level.")
-            state["next_agent"] = END
+            print(f"Max attempts reached for current strategy.")
+            
+            if state["failed_strategies"] >= MAX_STRATEGY_CHANGES_PER_LEVEL:
+                print("Max strategy changes reached, ending level.")
+                state["next_agent"] = END
+            else:
+                state["failed_strategies"] += 1
+                print(f"Strategy failed. Failed strategies: {state['failed_strategies']}/{MAX_STRATEGY_CHANGES_PER_LEVEL + 1}")
+                print("Changing strategy...")
+                state["attempts"] = 0  # Reset attempts for new strategy
+                state["next_agent"] = "strategist"
         else:
-            state["next_agent"] = "prompt_engineer"  # Try another prompt
+            state["next_agent"] = "prompt_engineer"
     
     return state 

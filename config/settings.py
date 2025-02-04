@@ -10,7 +10,7 @@ GRAPH_CONFIG = {"configurable": {"thread_id": "1"}}
 
 # Constants
 MAX_ATTEMPTS_PER_LEVEL = 1
-STRATEGY_CHANGE_THRESHOLD = 1  # Change strategy after this many failed attempts with same approach
+MAX_STRATEGY_CHANGES_PER_LEVEL = 1  # Maximum number of strategy changes before giving up on a level
 
 # LLM Configuration
 LLM_MODEL = "claude-3-5-sonnet-20241022"

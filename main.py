@@ -57,7 +57,8 @@ def solve_gandalf():
         "analysis": {},
         "next_agent": "strategist",
         "completion_history": {"entries": []},
-        "attempts": 0
+        "attempts": 0,
+        "failed_strategies": 0
     }
 
     # print("\n🔄 Initial state:", initial_state)
