@@ -381,9 +381,7 @@ def build_gandalf_graph() -> StateGraph:
     
     return graph.compile(checkpointer=memory)
 
-def solve_gandalf():
-    graph = build_gandalf_graph()
-    
+def solve_gandalf(graph):
     # Load previous attempts history
     history = {}
     if ATTEMPTS_HISTORY_FILE.exists():
@@ -428,5 +426,35 @@ def solve_gandalf():
             print(f"Next agent: {event['next_agent']}")
             print("-" * 80)
 
+def generate_mermaid_graph(graph):
+    """
+    Generate a Mermaid graph representation of the LangGraph.
+    
+    Args:
+        graph: The compiled LangGraph object
+        
+    Returns:
+        str: Mermaid graph markdown string
+    """
+    try:
+        graph_obj = graph.get_graph()
+        mermaid_lines = ["```mermaid", "graph TD"]
+        
+        for edge in graph_obj.edges:
+            source, target = edge.source, edge.target
+            is_conditional = edge.conditional
+            
+            if is_conditional:
+                mermaid_lines.append(f"    {source} -.-> {target}")
+            else:
+                mermaid_lines.append(f"    {source} --> {target}")
+        
+        mermaid_lines.append("```")
+        return "\n".join(mermaid_lines)
+    except Exception as e:
+        return f"Error generating Mermaid graph: {str(e)}"
+
 if __name__ == "__main__":
-    solve_gandalf()
+    graph = build_gandalf_graph()
+    print(generate_mermaid_graph(graph))
+    solve_gandalf(graph)
