@@ -1,10 +1,11 @@
 import json
 import re
 from langchain_anthropic import ChatAnthropic
-from ..core.state import GandalfState
-from ..core.api import get_defender_info
-from ..prompts.templates import STRATEGIST_SYSTEM, get_strategist_human_message
-from ..config.settings import LLM_MODEL, LLM_TEMPERATURE, ANTHROPIC_API_KEY
+from core.state import GandalfState
+from core.api import get_defender_info
+from prompts.templates import STRATEGIST_SYSTEM, get_strategist_human_message
+from config.settings import LLM_MODEL, LLM_TEMPERATURE, ANTHROPIC_API_KEY
+
 
 llm = ChatAnthropic(
     model=LLM_MODEL,

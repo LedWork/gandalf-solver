@@ -9,8 +9,8 @@ load_dotenv()
 GRAPH_CONFIG = {"configurable": {"thread_id": "1"}}
 
 # Constants
-MAX_ATTEMPTS_PER_LEVEL = 3
-STRATEGY_CHANGE_THRESHOLD = 2  # Change strategy after this many failed attempts with same approach
+MAX_ATTEMPTS_PER_LEVEL = 1
+STRATEGY_CHANGE_THRESHOLD = 1  # Change strategy after this many failed attempts with same approach
 
 # LLM Configuration
 LLM_MODEL = "claude-3-5-sonnet-20241022"

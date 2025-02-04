@@ -56,10 +56,11 @@ def solve_gandalf():
         "history": history,
         "analysis": {},
         "next_agent": "strategist",
-        "completion_history": {"entries": []}
+        "completion_history": {"entries": []},
+        "attempts": 0
     }
 
-    print("\n🔄 Initial state:", initial_state)
+    # print("\n🔄 Initial state:", initial_state)
     print("\n🚀 Starting the challenge...\n")
     
     # Run the graph

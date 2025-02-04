@@ -15,7 +15,7 @@ pip install -U -r requirements.txt
 ## Run the app
 
 ```bash
-python3 ./gandalf_graph.py
+python3 ./main.py
 ```
 
 ## Display the graph

@@ -3,11 +3,11 @@ import re
 from datetime import datetime
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import AIMessage
-from ..core.state import GandalfState
-from ..core.api import send_message
-from ..core.history import save_attempt_history
-from ..prompts.templates import PROMPT_ENGINEER_SYSTEM, get_prompt_engineer_human_message
-from ..config.settings import LLM_MODEL, LLM_TEMPERATURE, ANTHROPIC_API_KEY
+from core.state import GandalfState
+from core.api import send_message
+from core.history import save_attempt_history
+from prompts.templates import PROMPT_ENGINEER_SYSTEM, get_prompt_engineer_human_message
+from config.settings import LLM_MODEL, LLM_TEMPERATURE, ANTHROPIC_API_KEY
 
 llm = ChatAnthropic(
     model=LLM_MODEL,

@@ -3,8 +3,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any
 
-HISTORY_FILE = Path("gandalf/history.json")
-ATTEMPTS_HISTORY_FILE = Path("gandalf/attempts_history.json")
+HISTORY_FILE = Path("history.json")
+ATTEMPTS_HISTORY_FILE = Path("attempts_history.json")
 
 def save_attempt_history(history: Dict[str, List[Dict[str, str]]]) -> None:
     """Save the attempts history to a file."""

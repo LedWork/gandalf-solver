@@ -1,16 +1,18 @@
 import json
 import re
 from langchain_anthropic import ChatAnthropic
-from ..core.state import GandalfState
-from ..core.api import guess_password
-from ..core.history import save_completion_history
-from ..prompts.templates import (
+from langgraph.graph import END
+from core.state import GandalfState
+from core.api import guess_password
+from core.history import save_completion_history
+
+from prompts.templates import (
     ANALYZER_SYSTEM,
     get_analyzer_human_message,
     PASSWORD_EXTRACTOR_SYSTEM,
     get_password_extractor_human_message
 )
-from ..config.settings import (
+from config.settings import (
     LLM_MODEL,
     LLM_TEMPERATURE,
     ANTHROPIC_API_KEY,
@@ -26,12 +28,11 @@ llm = ChatAnthropic(
 def response_analyzer(state: GandalfState) -> GandalfState:
     """Analyzes the response and extracts potential passwords."""
     latest_attempt = state["history"][state["current_defender"]][-1]
-    current_attempts = len(state["history"][state["current_defender"]])
     
     messages = [
         ANALYZER_SYSTEM,
         get_analyzer_human_message(
-            current_attempts=current_attempts,
+            current_attempts=state["attempts"],
             max_attempts=MAX_ATTEMPTS_PER_LEVEL,
             prompt=latest_attempt['prompt'],
             response=latest_attempt['response'],
@@ -101,15 +102,17 @@ def response_analyzer(state: GandalfState) -> GandalfState:
             state["current_defender"] = guess_result["next_defender"]
             state["level"] += 1
             state["next_agent"] = "strategist"
+            state["attempts"] = 0  # Reset attempts on success
             print("Next defender:", guess_result["next_defender"], "and level", state["level"])
         else:
             print("No next defender, ending level")
-            state["next_agent"] = "END"
+            state["next_agent"] = END
     else:
-        print(f"Password guess failed. Attempts: {current_attempts}/{MAX_ATTEMPTS_PER_LEVEL}")
-        if current_attempts >= MAX_ATTEMPTS_PER_LEVEL:
+        state["attempts"] += 1  # Increment attempts on failure
+        print(f"Password guess failed. Attempts: {state['attempts']}/{MAX_ATTEMPTS_PER_LEVEL}")
+        if state["attempts"] >= MAX_ATTEMPTS_PER_LEVEL:
             print("Max attempts reached, ending level.")
-            state["next_agent"] = "END"
+            state["next_agent"] = END
         else:
             state["next_agent"] = "prompt_engineer"  # Try another prompt
     

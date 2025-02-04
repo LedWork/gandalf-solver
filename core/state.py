@@ -21,6 +21,9 @@ def reducer_analysis(state: Dict[str, Any], update: Dict[str, Any]) -> Dict[str,
 def reducer_completion_history(state: Dict[str, List[Dict[str, Any]]], update: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
     return {**state, **update}
 
+def reducer_attempts(state: int, update: int) -> int:
+    return update
+
 class GandalfState(TypedDict):
     messages: Annotated[list, add_messages]
     current_defender: Annotated[str, reducer_current_defender]
@@ -28,4 +31,5 @@ class GandalfState(TypedDict):
     history: Annotated[Dict[str, List[Dict[str, str]]], reducer_history]
     analysis: Annotated[Dict[str, Any], reducer_analysis]
     next_agent: Annotated[str, reducer_next_agent]
-    completion_history: Annotated[Dict[str, List[Dict[str, Any]]], reducer_completion_history] 
+    completion_history: Annotated[Dict[str, List[Dict[str, Any]]], reducer_completion_history]
+    attempts: Annotated[int, reducer_attempts] 
