@@ -1,14 +1,6 @@
 # gandalf-solver
 
-## Naive approach
-
-```
-bun run app.ts
-```
-
-## Advanced approach with langgraph
-
-### Setup
+## Setup
 
 1. Copy the .env.template file to .env and add your API keys.
 2. Install the dependencies:
@@ -20,7 +12,7 @@ source .env
 pip install -U -r requirements.txt
 ```
 
-### Run the app
+## Run the app
 
 ```bash
 python3 ./gandalf_graph.py
