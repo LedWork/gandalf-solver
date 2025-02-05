@@ -17,7 +17,7 @@ from config.settings import (
     LLM_TEMPERATURE,
     ANTHROPIC_API_KEY,
     MAX_ATTEMPTS_PER_LEVEL,
-    MAX_STRATEGY_CHANGES_PER_LEVEL
+    MAX_STRATEGIES_PER_LEVEL
 )
 
 llm = ChatAnthropic(
@@ -117,15 +117,17 @@ def response_analyzer(state: GandalfState) -> GandalfState:
         if state["attempts"] >= MAX_ATTEMPTS_PER_LEVEL:
             print(f"Max attempts reached for current strategy.")
             
-            if state["failed_strategies"] >= MAX_STRATEGY_CHANGES_PER_LEVEL:
-                print("Max strategy changes reached, ending level.")
+            state["failed_strategies"] += 1
+            print(f"Strategy failed. Failed strategies: {state['failed_strategies']}/{MAX_STRATEGIES_PER_LEVEL}")
+
+            if state["failed_strategies"] >= MAX_STRATEGIES_PER_LEVEL:
+                print("Max strategies tried, ending level.")
                 state["next_agent"] = END
             else:
-                state["failed_strategies"] += 1
-                print(f"Strategy failed. Failed strategies: {state['failed_strategies']}/{MAX_STRATEGY_CHANGES_PER_LEVEL + 1}")
                 print("Changing strategy...")
                 state["attempts"] = 0  # Reset attempts for new strategy
                 state["next_agent"] = "strategist"
+                print(f"Moving to next strategy. Strategy {state['failed_strategies'] + 1}/{MAX_STRATEGIES_PER_LEVEL}")
         else:
             state["next_agent"] = "prompt_engineer"
     
