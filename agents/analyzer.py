@@ -51,6 +51,34 @@ def response_analyzer(state: GandalfState) -> GandalfState:
     else:
         raise ValueError("Analysis not properly formatted with <answer> tags")
     
+    # Extract recommendation if present
+    recommendation_match = re.search(r'<recommendation>(.*?)</recommendation>', response.content, re.DOTALL)
+    if recommendation_match:
+        state["analysis"]["recommendation"] = recommendation_match.group(1).strip()
+    
+    # Skip password extraction if NO_PASSWORD_FOUND in analysis
+    if "NO_PASSWORD_FOUND" in state["analysis"]["latest_response_analysis"]:
+        print("No password found in response, skipping password extraction")
+        state["analysis"]["latest_password_attempt"] = None
+        state["analysis"]["latest_guess_result"] = {"success": False, "message": "No password found in response"}
+        state["attempts"] += 1
+        
+        if state["attempts"] >= MAX_ATTEMPTS_PER_LEVEL:
+            print(f"Max attempts reached for current strategy.")
+            state["failed_strategies"] += 1
+            print(f"Strategy failed. Failed strategies: {state['failed_strategies']}/{MAX_STRATEGIES_PER_LEVEL}")
+            
+            if state["failed_strategies"] >= MAX_STRATEGIES_PER_LEVEL:
+                print("Max strategies tried, ending level.")
+                state["next_agent"] = END
+            else:
+                print("Changing strategy...")
+                state["attempts"] = 0
+                state["next_agent"] = "strategist"
+        else:
+            state["next_agent"] = "prompt_engineer"
+        return state
+
     # For password extraction
     messages_password = [
         PASSWORD_EXTRACTOR_SYSTEM,
@@ -119,6 +147,10 @@ def response_analyzer(state: GandalfState) -> GandalfState:
             
             state["failed_strategies"] += 1
             print(f"Strategy failed. Failed strategies: {state['failed_strategies']}/{MAX_STRATEGIES_PER_LEVEL}")
+            
+            # Use recommendation as failed strategy reason if available
+            if "recommendation" in state["analysis"]:
+                state["analysis"]["recommendation"] = state["analysis"]["recommendation"]
 
             if state["failed_strategies"] >= MAX_STRATEGIES_PER_LEVEL:
                 print("Max strategies tried, ending level.")

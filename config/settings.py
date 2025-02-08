@@ -9,7 +9,7 @@ load_dotenv()
 GRAPH_CONFIG = {"configurable": {"thread_id": "1"}}
 
 # Constants
-MAX_ATTEMPTS_PER_LEVEL = 1
+MAX_ATTEMPTS_PER_LEVEL = 3
 MAX_STRATEGIES_PER_LEVEL = 2  # Maximum number of strategies to try per level
 
 # LLM Configuration

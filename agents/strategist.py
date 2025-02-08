@@ -29,10 +29,12 @@ def strategist_agent(state: GandalfState) -> GandalfState:
         get_strategist_human_message(
             level_info=f"{defender_info.level} Info:\nDescription: {defender_info.description}",
             attempts_summary=attempts_summary,
-            previous_strategies=json.dumps(state['analysis'].get('previous_strategies', []), indent=2)
+            previous_strategies=json.dumps(state['analysis'].get('previous_strategies', []), indent=2),
+            recommendation=state['analysis'].get('recommendation', 'No recommendation')
         )
     ]
     
+
     response = llm.invoke(messages)
     
     # Extract strategy from between answer tags
