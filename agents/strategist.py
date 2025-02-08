@@ -34,13 +34,17 @@ def strategist_agent(state: GandalfState) -> GandalfState:
         )
     ]
     
-
     response = llm.invoke(messages)
     
     # Extract strategy from between answer tags
     strategy = re.search(r'<answer>(.*?)</answer>', response.content, re.DOTALL)
     if strategy:
         state["analysis"]["strategy"] = strategy.group(1).strip()
+        # Add strategy printing
+        print("\n🎯 Selected Strategy:")
+        print("=" * 80)
+        print(state["analysis"]["strategy"])
+        print("=" * 80)
     else:
         raise ValueError("Strategy not properly formatted with <answer> tags")
     
