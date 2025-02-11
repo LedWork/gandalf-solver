@@ -18,6 +18,17 @@ pip install -U -r requirements.txt
 python3 ./main.py
 ```
 
+## Edit the settings
+
+Edit the `config/settings.py` file to change the model, temperature, and other settings.
+
+```text
+LLM_MODEL=...
+LLM_TEMPERATURE=...
+MAX_ATTEMPTS_PER_LEVEL=...
+MAX_STRATEGIES_PER_LEVEL=...
+```
+
 ## Display the graph
 
 <table>
